@@ -90,7 +90,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              && a.Date.AddHours(offset).Date >= DateFrom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && b.IsReceived == status
-                             && (transaction == 0 ? (!b.Reference.Contains("EVR-KB/RTP") && !b.Reference.Contains("EVR-KB/RTU")) : (b.Reference.Contains("EVR-KB/RTP") || b.Reference.Contains("EVR-KB/RTU")))
+                             && (transaction == 0 ? (!b.Reference.Contains("BTS-KB/RTP") && !b.Reference.Contains("BTS-KB/RTU")) : (b.Reference.Contains("BTS-KB/RTP") || b.Reference.Contains("BTS-KB/RTU")))
                              && b.PackingList.Contains(string.IsNullOrWhiteSpace(packingList) ? b.PackingList : packingList)
 
                          select new ExpeditionReportViewModel
@@ -218,7 +218,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 try
                 {
                     int totalweight = 0;
-                    string code = GenerateCode("EVR-KB/EXP");
+                    string code = GenerateCode("BTS-KB/EXP");
                     
                     model.Code = code;
                     model.Date = DateTimeOffset.Now;
@@ -227,7 +227,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                         TransferOutDoc transferOutDoc = new TransferOutDoc();
                         i.Id = 0;
                         totalweight += i.Weight;
-                        string CodeTransferOut = GenerateCode("EVR-KB/EXP");
+                        string CodeTransferOut = GenerateCode("BTS-KB/EXP");
                         var SPK = dbContext.SPKDocs.Where(x => x.PackingList == i.PackingList).Single();
                         SPK.IsDistributed = true;
                         transferOutDoc.Code = CodeTransferOut;

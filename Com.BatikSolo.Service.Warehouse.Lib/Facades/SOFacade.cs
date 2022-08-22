@@ -214,7 +214,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             SODocsViewModel soDocs = new SODocsViewModel
             {
-                code = GenerateCode("EVR-SO/INT"),
+                code = GenerateCode("BTS-SO/INT"),
                 storage = new StorageViewModel
                 {
                     _id = storages.Id,
@@ -241,8 +241,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     var model = dbContext.StockOpnameDocs.Where(x => x.Id == viewModel.Id).FirstOrDefault();
                     model.IsProcessed = true;
                     
-                    string inventoryMovementIn = GenerateCode("EVR-TB/SO");
-                    string inventoryMovementOut = GenerateCode("EVR-KB/SO");
+                    string inventoryMovementIn = GenerateCode("BTS-TB/SO");
+                    string inventoryMovementOut = GenerateCode("BTS-KB/SO");
 
                     List<TransferInDocItem> transferInDocsItems = new List<TransferInDocItem>();
                     List<InventoryMovement> inventoryMovements = new List<InventoryMovement>();
@@ -565,7 +565,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         //{
         //    var Query = from a in dbContext.TransferOutDocs
         //               join b in dbContext.SPKDocs on a.Code equals b.Reference
-        //               where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+        //               where a.Code.Contains("BTS-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
         //               select new TransferStockViewModel
         //               {
         //                   id = (int)a.Id,

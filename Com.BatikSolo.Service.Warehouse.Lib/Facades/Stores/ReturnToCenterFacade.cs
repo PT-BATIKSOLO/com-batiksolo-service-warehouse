@@ -50,7 +50,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
                                                          //join d in dbContext.SPKDocsItems on c.Id equals d.SPKDocsId
                                                          join f in dbContext.ExpeditionItems on a.Code equals f.Reference
                                                          join g in dbContext.Expeditions on f.ExpeditionId equals g.Id
-                                                         where a.Code.Contains("EVR-KB/RTP")
+                                                         where a.Code.Contains("BTS-KB/RTP")
                                                          select new TransferOutReadViewModel
                                                          {
                                                              _id = (int)a.Id,
@@ -124,7 +124,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
             {
                 try
                 {
-                    string codeOut = GenerateCode("EVR-KB/RTP");
+                    string codeOut = GenerateCode("BTS-KB/RTP");
                     model2.Code = codeOut;
                     model2.Date = DateTimeOffset.Now;
                     List<ExpeditionItem> expeditionItems = new List<ExpeditionItem>();
@@ -157,7 +157,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
 
                     SPKDocs sPKDocs = new SPKDocs
                     {
-                        Code = GenerateCode("EVR-PK/PBJ"),
+                        Code = GenerateCode("BTS-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         IsDistributed = true,
                         IsDraft = false,
@@ -165,7 +165,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
                         DestinationCode = model2.DestinationCode,
                         DestinationId = model2.DestinationId,
                         DestinationName = model2.DestinationName,
-                        PackingList = GenerateCode("EVR-KB/PLR"),
+                        PackingList = GenerateCode("BTS-KB/PLR"),
                         Password = String.Join("", GenerateCode(DateTime.Now.ToString("dd")).Split("/")),
                         Reference = codeOut,
                         SourceCode = model2.SourceCode,
@@ -261,7 +261,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
 
                     Expedition expedition = new Expedition
                     {
-                        Code = GenerateCode("EVR-KB/EXP"),
+                        Code = GenerateCode("BTS-KB/EXP"),
                         Date = DateTimeOffset.Now,
                         ExpeditionServiceCode = model.expeditionService.code,
                         ExpeditionServiceId = (int)model.expeditionService._id,

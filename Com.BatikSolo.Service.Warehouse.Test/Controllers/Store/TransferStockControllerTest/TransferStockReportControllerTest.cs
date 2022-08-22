@@ -80,7 +80,7 @@ namespace Com.BatikSolo.Service.Warehouse.Test.Controllers.Store.TransferStockCo
         public TransferOutDoc GetTestData(WarehouseDbContext dbContext)
         {
             SPKDocs data = new SPKDocs();
-            data.Reference = "EVR-KB/RTT";
+            data.Reference = "BTS-KB/RTT";
             data.CreatedBy = "unittestusername";
             data.Id = 1;
             data.SourceCode = "GDG.01";

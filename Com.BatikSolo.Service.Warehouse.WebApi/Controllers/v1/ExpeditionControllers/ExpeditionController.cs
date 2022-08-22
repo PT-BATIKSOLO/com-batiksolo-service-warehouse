@@ -19,7 +19,7 @@ namespace Com.BatikSolo.Service.Warehouse.WebApi.Controllers.v1.ExpeditionContro
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/efr-kb-exp")]
+    [Route("v{version:apiVersion}/bts-kb-exp")]
     [Authorize]
     public class ExpeditionController : Controller
     {

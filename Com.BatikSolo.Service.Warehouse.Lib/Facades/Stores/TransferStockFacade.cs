@@ -72,7 +72,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
                              && a.Date.AddHours(offset).Date >= DatEVRom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && a.Code.Contains(string.IsNullOrWhiteSpace(code) ? a.Code : code)
-                             && b.Reference.Contains("EVR-KB/RTT")
+                             && b.Reference.Contains("BTS-KB/RTT")
                              && b.DestinationName != "GUDANG TRANSFER STOCK"
                              && b.IsReceived == (status.Equals("Semua") ? b.IsReceived : (status.Equals("Belum Diterima") ? false : true)) 
 
@@ -132,13 +132,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
             {
                 try
                 {
-                    string codeOut = GenerateCode("EVR-KB/RTT");
-                    string packingList1 = GenerateCode("EVR-KB/PLR");
-                    string CodeIn = GenerateCode("EVR-TB/BRT");
-                    string packingList2 = GenerateCode("EVR-KB/PLB");
-                    string expCode = GenerateCode("EVR-KB/EXP");
-                    string expCode2 = GenerateCode("EVR-KB/EXP");
-                    string codetransferin = GenerateCode("EVR-TB/BRT");
+                    string codeOut = GenerateCode("BTS-KB/RTT");
+                    string packingList1 = GenerateCode("BTS-KB/PLR");
+                    string CodeIn = GenerateCode("BTS-TB/BRT");
+                    string packingList2 = GenerateCode("BTS-KB/PLB");
+                    string expCode = GenerateCode("BTS-KB/EXP");
+                    string expCode2 = GenerateCode("BTS-KB/EXP");
+                    string codetransferin = GenerateCode("BTS-TB/BRT");
                     model2.Code = codeOut;
                     model2.Date = DateTimeOffset.Now;
                     var storages = GetStorage("GDG.05");
@@ -257,7 +257,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
 
                     SPKDocs sPKDocs1 = new SPKDocs
                     {
-                        Code = GenerateCode("EVR-PK/PBJ"),
+                        Code = GenerateCode("BTS-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         SourceId = model2.SourceId,
                         SourceCode = model2.SourceCode,
@@ -299,7 +299,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
 
                     SPKDocs sPKDocs2 = new SPKDocs
                     {
-                        Code = GenerateCode("EVR-PK/PBJ"),
+                        Code = GenerateCode("BTS-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         DestinationId = model2.DestinationId,
                         DestinationCode = model2.DestinationCode,
@@ -672,7 +672,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
         {
             var Query =  from a in dbContext.TransferOutDocs
                          join b in dbContext.SPKDocs on a.Code equals b.Reference
-                         where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                         where a.Code.Contains("BTS-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
                          orderby a.Date descending
                          select new TransferStockViewModel
                          {
@@ -711,7 +711,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades.Stores
             var Query = from a in dbContext.TransferOutDocs
                         join b in dbContext.SPKDocs on a.Code equals b.Reference
                         join c in dbContext.TransferOutDocItems on a.Id equals c.TransferOutDocsId
-                        where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                        where a.Code.Contains("BTS-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
                         && a.Id == id
                         select new 
                         {

@@ -177,7 +177,7 @@ namespace Com.BatikSolo.Service.Warehouse.Test.Facades.PkpbjFacades
 		{
 			Com.BatikSolo.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.BatikSolo.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
 			var model = await dataUtil(facade, GetCurrentMethod()).GetTestDataUpload();
-			model.PackingList = "EVR-FN";
+			model.PackingList = "BTS-FN";
 			var Response = facade.ReadForUploadNew(1,25,"{}","","");
 			Assert.Empty(Response.Item1);
 		}

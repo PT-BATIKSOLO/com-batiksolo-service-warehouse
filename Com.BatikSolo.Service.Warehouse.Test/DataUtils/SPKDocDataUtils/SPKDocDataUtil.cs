@@ -71,7 +71,7 @@ namespace Com.BatikSolo.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 				IsDistributed = false,
 				IsDraft = false,
 				IsReceived = false,
-				PackingList = "EVR-FN",
+				PackingList = "BTS-FN",
 				Password = "password",
 				SourceCode = "SourceCode",
 				SourceId = 1,
@@ -139,7 +139,7 @@ namespace Com.BatikSolo.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 					SourceId = 1,
 					SourceName = "SourceName",
 					Weight = 1,
-					Reference = "EVR-KB/RTT",
+					Reference = "BTS-KB/RTT",
 					Items = new List<SPKDocsItem>
 				{
 					new SPKDocsItem

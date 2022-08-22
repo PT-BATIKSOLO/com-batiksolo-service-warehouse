@@ -207,7 +207,7 @@ namespace Com.BatikSolo.Service.Warehouse.Test.Facades.PkpbjFacades
 			viewModel.articleRealizationOrder = "Ro";
 			viewModel.domesticCOGS = 0;
 			viewModel.domesticSale = 0;
-			viewModel.PackingList = "EVR-FN";
+			viewModel.PackingList = "BTS-FN";
 			viewModel.Password = "1";
 			viewModel.size = "S";
 			viewModel.uom = "Pcs";
