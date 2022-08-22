@@ -18,7 +18,7 @@ namespace Com.BatikSolo.Service.Warehouse.WebApi.Controllers.v1.Stores.ReturnToC
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/stores/BTS-kb-rtp")]
+    [Route("v{version:apiVersion}/stores/bts-kb-rtp")]
     [Authorize]
     public class ReturnToCenterController : Controller
     {

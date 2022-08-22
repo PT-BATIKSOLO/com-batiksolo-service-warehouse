@@ -18,7 +18,7 @@ namespace Com.BatikSolo.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferI
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/stores/efr-tb-bbt")]
+    [Route("v{version:apiVersion}/stores/bts-tb-bbt")]
     [Authorize]
     public class TransferInController : Controller
     {
