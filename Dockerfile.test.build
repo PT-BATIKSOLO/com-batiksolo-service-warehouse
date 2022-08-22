@@ -1,0 +1,10 @@
+FROM microsoft/aspnetcore-build:2.0.2
+WORKDIR /app
+
+COPY Com.BatikSolo.Service.Warehouse.Lib/*.csproj ./Com.BatikSolo.Service.Warehouse.Lib/
+COPY Com.BatikSolo.Service.Warehouse.WebApi/*.csproj ./Com.BatikSolo.Service.Warehouse.WebApi/
+RUN dotnet restore ./Com.BatikSolo.Service.Warehouse.WebApi/
+
+COPY Com.BatikSolo.Service.Warehouse.Lib/. ./Com.BatikSolo.Service.Warehouse.Lib/
+COPY Com.BatikSolo.Service.Warehouse.WebApi/. ./Com.BatikSolo.Service.Warehouse.WebApi/
+RUN dotnet publish ./Com.BatikSolo.Service.Warehouse.WebApi/ --output /out/ --configuration Release

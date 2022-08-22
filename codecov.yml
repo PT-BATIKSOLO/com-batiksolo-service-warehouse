@@ -1,0 +1,4 @@
+ignore:
+  - "Com.BatikSolo.Service.Warehouse.Lib/Migrations" 
+  - "Com.BatikSolo.Service.Warehouse.WebApi/Startup.cs"
+  - "Com.BatikSolo.Service.Warehouse.WebApi/SchedulerJobs/MasterRegistry.cs"
