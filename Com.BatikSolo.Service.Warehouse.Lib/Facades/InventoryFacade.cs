@@ -448,10 +448,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 Query = Query.OrderBy(string.Concat(Key, " ", OrderType));
             }
 
-            Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
+            //Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
             //List<InventoriesReportViewModel> Data = Query.ToList<InventoriesReportViewModel>();
-            List<InventoryMovementsReportViewModel> Data = pageable.Data.ToList<InventoryMovementsReportViewModel>();
-            int TotalData = pageable.TotalCount;
+            List<InventoryMovementsReportViewModel> Data = Query.ToList<InventoryMovementsReportViewModel>();
+            int TotalData = Query.Count();
 
             //return Tuple.Create(Data, Data.Count());
             return Tuple.Create(Data, TotalData);
@@ -620,8 +620,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
         {
             var Query = (from c in dbContext.InventoryMovements
-                         join d in dbContext.Inventories 
-                         on new {c.ItemCode, c.StorageCode} equals new {d.ItemCode, d.StorageCode}
+                         join d in dbContext.Inventories
+                         on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
                          where c.IsDeleted == false
                          && c.CreatedUtc >= firstDay
                          && c.CreatedUtc <= lastDay
@@ -645,6 +645,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              StorageCode = c.StorageCode,
                              StorageName = c.StorageName,
                              CreatedUtc = c.CreatedUtc,
+                             DestinationName = c.Type == "OUT" ? dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault()
                          }).OrderBy(a=>a.Date.Date).ThenBy(a=>a.StorageCode).ThenBy(a=>a.ItemCode);
 
             return Query;
