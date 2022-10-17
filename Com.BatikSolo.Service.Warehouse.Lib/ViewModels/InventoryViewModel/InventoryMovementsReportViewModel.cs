@@ -36,5 +36,6 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.ViewModels.InventoryViewModel
         public string StorageName { get; set; }
         //public bool StorageisCentral { get; set; }
         public string DestinationName { get; set; }
+        public string SourceName { get; set; }
     }
 }
