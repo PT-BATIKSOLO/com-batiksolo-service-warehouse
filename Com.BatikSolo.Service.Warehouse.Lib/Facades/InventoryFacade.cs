@@ -623,8 +623,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                          join d in dbContext.Inventories
                          on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
                          where c.IsDeleted == false
-                         && c.CreatedUtc >= firstDay
-                         && c.CreatedUtc <= lastDay
+                         && c.Date.AddHours(7).Date >= firstDay.Date
+                         && c.Date.AddHours(7).Date <= lastDay.Date
                          orderby c.Date, c.StorageCode, c.ItemCode
                          select new InventoryMovementsReportViewModel
                          {
@@ -645,8 +645,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              StorageCode = c.StorageCode,
                              StorageName = c.StorageName,
                              CreatedUtc = c.CreatedUtc,
-                             DestinationName = c.Type == "OUT" ? dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault()
-                         }).OrderBy(a=>a.Date.Date).ThenBy(a=>a.StorageCode).ThenBy(a=>a.ItemCode);
+                             SourceName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault(),
+                             DestinationName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault()
+                         }).OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
 
             return Query;
         }
@@ -680,12 +681,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             var Query = GetMovementByDateQuery(firstDay, lastDay);
 
             DataTable result = new DataTable();
-            var headers = new string[] { "No", "Tanggal", "Kode Toko", "Nama Toko", "Barcode", "Nama Barang", "RO", "Harga", "Tipe", "Sebelum", "Kuantitas", "Setelah", "Referensi", "Keterangan" };
+            var headers = new string[] { "No", "Tanggal", "Asal", "Tujuan", "Barcode", "Nama Barang", "RO", "Harga", "Tipe", "Sebelum", "Kuantitas", "Setelah", "Referensi", "Keterangan" };
 
             result.Columns.Add(new DataColumn() { ColumnName = "No", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Tanggal", DataType = typeof(String) });
-            result.Columns.Add(new DataColumn() { ColumnName = "Kode Toko", DataType = typeof(String) });
-            result.Columns.Add(new DataColumn() { ColumnName = "Nama Toko", DataType = typeof(String) });
+            //result.Columns.Add(new DataColumn() { ColumnName = "Kode Toko", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Asal", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tujuan", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Barcode", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Nama Barang", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "RO", DataType = typeof(String) });
@@ -707,12 +709,12 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 var q = Query.ToList();
                 var index = 0;
 
-                foreach(InventoryMovementsReportViewModel temp in q)
+                foreach (InventoryMovementsReportViewModel temp in q)
                 {
                     InventoryMovementsReportViewModel dup = Array.Find(dateSpan, o => o.Date.Date.ToString() == temp.Date.Date.ToString());
-                    if(dup != null)
+                    if (dup != null)
                     {
-                        if(dup.count == 0)
+                        if (dup.count == 0)
                         {
                             index++;
                             dup.count = index;
@@ -723,7 +725,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                 foreach (var item in q)
                 {
-                    result.Rows.Add(item.count, item.Date.Date, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName,
+                    result.Rows.Add(item.count, item.Date.Date, item.SourceName, item.DestinationName, item.ItemCode, item.ItemName,
                         item.ItemArticleRealizationOrder, item.ItemDomesticSale,
                         item.Type, item.Before, item.Quantity, item.After, item.Reference, item.Remark);
                 }
@@ -773,6 +775,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 sheet.Cells["L5"].Value = headers[11];
                 sheet.Cells["M5"].Value = headers[12];
                 sheet.Cells["N5"].Value = headers[13];
+                //sheet.Cells["O5"].Value = headers[14];
 
                 var widths = new int[] { 5, 10, 10, 10, 15, 20, 10, 10, 5, 5, 5, 5, 15, 10 };
 
@@ -784,9 +787,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 var data = Query.ToArray();
                 int value;
 
-                foreach(var b in Query)
+                foreach (var b in Query)
                 {
-                    if(Date.TryGetValue(b.Date.Date.ToString(), out value))
+                    if (Date.TryGetValue(b.Date.Date.ToString(), out value))
                     {
                         Date[b.Date.Date.ToString()]++;
                     }
@@ -795,22 +798,22 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                         Date[b.Date.Date.ToString()] = 1;
                     }
 
-                    if (DateStorage.TryGetValue(b.Date.Date.ToString()+b.StorageCode, out value))
+                    if (DateStorage.TryGetValue(b.Date.Date.ToString() + b.SourceName + b.DestinationName, out value))
                     {
-                        DateStorage[b.Date.Date.ToString()+b.StorageCode]++;
+                        DateStorage[b.Date.Date.ToString() + b.SourceName + b.DestinationName]++;
                     }
                     else
                     {
-                        DateStorage[b.Date.Date.ToString()+b.StorageCode] = 1;
+                        DateStorage[b.Date.Date.ToString() + b.SourceName + b.DestinationName] = 1;
                     }
 
-                    if (DateStorageItem.TryGetValue(b.Date.Date.ToString()+b.StorageCode+b.ItemCode, out value))
+                    if (DateStorageItem.TryGetValue(b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode, out value))
                     {
-                        DateStorageItem[b.Date.Date.ToString()+b.StorageCode+b.ItemCode]++;
+                        DateStorageItem[b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode]++;
                     }
                     else
                     {
-                        DateStorageItem[b.Date.Date.ToString() + b.StorageCode + b.ItemCode] = 1;
+                        DateStorageItem[b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode] = 1;
                     }
                 }
 
@@ -818,7 +821,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 int index_2 = 7;
                 int index_3 = 7;
 
-                foreach(KeyValuePair<string, int> b in Date)
+                foreach (KeyValuePair<string, int> b in Date)
                 {
                     sheet.Cells["A" + index_1 + ":A" + (index_1 + b.Value - 1)].Merge = true;
                     sheet.Cells["A" + index_1 + ":A" + (index_1 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
@@ -853,6 +856,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                     sheet.Cells["H" + index_3 + ":H" + (index_3 + b.Value - 1)].Merge = true;
                     sheet.Cells["H" + index_3 + ":H" + (index_3 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+
+                    //sheet.Cells["I" + index_3 + ":I" + (index_3 + b.Value - 1)].Merge = true;
+                    //sheet.Cells["I" + index_3 + ":I" + (index_3 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+
                     index_3 += b.Value;
                 }
             }
@@ -861,6 +868,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             package.SaveAs(stream);
             return stream;
         }
+
 
         #endregion
 
