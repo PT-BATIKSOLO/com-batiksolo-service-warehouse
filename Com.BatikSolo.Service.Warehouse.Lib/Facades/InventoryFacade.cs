@@ -618,7 +618,42 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         //    return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Territory") }, true);
         //}
 
-        public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
+        //public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
+        //{
+        //    var Query = (from c in dbContext.InventoryMovements
+        //                 join d in dbContext.Inventories
+        //                 on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
+        //                 where c.IsDeleted == false
+        //                 && c.Date.AddHours(7).Date >= firstDay.Date
+        //                 && c.Date.AddHours(7).Date <= lastDay.Date
+        //                 orderby c.Date, c.StorageCode, c.ItemCode
+        //                 select new InventoryMovementsReportViewModel
+        //                 {
+        //                     Date = c.Date,
+        //                     ItemCode = c.ItemCode,
+        //                     ItemName = c.ItemName,
+        //                     ItemArticleRealizationOrder = d.ItemArticleRealizationOrder,
+        //                     ItemSize = c.ItemSize,
+        //                     ItemUom = c.ItemUom,
+        //                     ItemDomesticSale = c.ItemDomesticSale,
+        //                     Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
+        //                     Before = c.Before,
+        //                     After = c.After,
+        //                     Type = c.Type,
+        //                     Reference = c.Reference,
+        //                     Remark = c.Remark,
+        //                     StorageId = c.StorageId,
+        //                     StorageCode = c.StorageCode,
+        //                     StorageName = c.StorageName,
+        //                     CreatedUtc = c.CreatedUtc,
+        //                     SourceName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault(),
+        //                     DestinationName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault()
+        //                 }).OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
+
+        //    return Query;
+        //}
+        
+        public IQueryable<InventoryMovementsMonthlyReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
         {
             SqlConnection conn = new SqlConnection("Server=batiksolo-db-server.database.windows.net,1433;Database=batiksolo-db-warehouse;User=batiksoloprd;password=batiksolo123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
             conn.Open();
@@ -631,15 +666,15 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 "		else (select top 1 DestinationName from TransferOutDocs where isdeleted = 0) end as DestinationName" +
                 " FROM[dbo].[InventoryMovements] a" +
                 " where Month(a.Date) = "+ lastDay.Month + " and Year(a.Date)= " + lastDay.Year + " and a.IsDeleted = 0", conn);
-            List<InventoryMovementsReportViewModel> dataList = new List<InventoryMovementsReportViewModel>();
+            List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                   // var date = Convert.ToDateTime(reader["Date"].ToString());
-                    InventoryMovementsReportViewModel data = new InventoryMovementsReportViewModel
+                    // var date = Convert.ToDateTime(reader["Date"].ToString());
+                    InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
                     {
-                        Date = new DateTimeOffset(Convert.ToDateTime(reader["Date"].ToString())),
+                        Date = reader["Date"].ToString(),
                         ItemCode = reader["ItemCode"].ToString(),
                         ItemName = reader["ItemName"].ToString(),
                         ItemArticleRealizationOrder = reader["ItemArticleRealizationOrder"].ToString(),
@@ -662,59 +697,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     dataList.Add(data);
                 }
             }
-                    //var ids= (from c in dbContext.InventoryMovements
-                    //          where c.IsDeleted == false
-                    //          && c.Date.AddHours(7).Date >= firstDay.Date
-                    //          && c.Date.AddHours(7).Date <= lastDay.Date
-                    //          select c.Id).ToList();
-
-                    //var Query = (from c in dbContext.InventoryMovements
-                    //             where ids.Contains(c.Id)
-                    //             select new InventoryMovementsReportViewModel
-                    //             {
-                    //                 Date = c.Date,
-                    //                 ItemCode = c.ItemCode,
-                    //                 ItemName = c.ItemName,
-                    //                 //ItemArticleRealizationOrder = dbContext.Inventories.FirstOrDefault(d=>c.ItemCode==d.ItemCode && c.StorageCode==d.StorageCode).ItemArticleRealizationOrder,
-                    //                 ItemSize = c.ItemSize,
-                    //                 ItemUom = c.ItemUom,
-                    //                 ItemDomesticSale = c.ItemDomesticSale,
-                    //                 Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
-                    //                 Before = c.Before,
-                    //                 After = c.After,
-                    //                 Type = c.Type,
-                    //                 Reference = c.Reference,
-                    //                 Remark = c.Remark,
-                    //                 StorageId = c.StorageId,
-                    //                 StorageCode = c.StorageCode,
-                    //                 StorageName = c.StorageName,
-                    //                 CreatedUtc = c.CreatedUtc,
-                    //                 //SourceName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault(),
-                    //                 //DestinationName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault()
-                    //             }).OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
-                    //List<InventoryMovementsReportViewModel> dataList = new List<InventoryMovementsReportViewModel>();
-
-                    //foreach (var item in Query.ToList())
-                    //{
-                    //    item.ItemArticleRealizationOrder = dbContext.Inventories.FirstOrDefault(d => item.ItemCode == d.ItemCode && item.StorageCode == d.StorageCode).ItemArticleRealizationOrder;
-
-                    //    if (item.Type == "IN")
-                    //    {
-                    //        item.SourceName = dbContext.TransferInDocs.Where(a => a.Code == item.Reference).Select(a => a.SourceName).FirstOrDefault();
-                    //        item.DestinationName = dbContext.TransferInDocs.Where(a => a.Code == item.Reference).Select(a => a.DestinationName).FirstOrDefault();
-
-                    //    }
-                    //    else
-                    //    {
-                    //        item.SourceName= dbContext.TransferOutDocs.Where(a => a.Code == item.Reference).Select(a => a.SourceName).FirstOrDefault();
-                    //        item.DestinationName= dbContext.TransferOutDocs.Where(a => a.Code == item.Reference).Select(a => a.DestinationName).FirstOrDefault();
-                    //    }
-                    //    dataList.Add(item);
-                    //}
-                    return dataList.AsQueryable().OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
+            return dataList.AsQueryable().OrderBy(a => a.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
         }
 
-        public Tuple<List<InventoryMovementsReportViewModel>, int> GetMovementsByDate(string _month, string _year, int page = 1, int size = 25)
+        public Tuple<List<InventoryMovementsMonthlyReportViewModel>, int> GetMovementsByDate(string _month, string _year, int page = 1, int size = 25)
         {
             var month = Convert.ToInt32(_month);
             var year = Convert.ToInt32(_year);
@@ -724,8 +710,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var Query = GetMovementByDateQuery(firstDay, lastDay);
 
-            Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
-            List<InventoryMovementsReportViewModel> Data = pageable.Data.ToList<InventoryMovementsReportViewModel>();
+            Pageable<InventoryMovementsMonthlyReportViewModel> pageable = new Pageable<InventoryMovementsMonthlyReportViewModel>(Query, page - 1, size);
+            List<InventoryMovementsMonthlyReportViewModel> Data = pageable.Data.ToList<InventoryMovementsMonthlyReportViewModel>();
             int TotalData = pageable.TotalCount;
 
             return Tuple.Create(Data, TotalData);
@@ -771,9 +757,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 var q = Query.ToList();
                 var index = 0;
 
-                foreach (InventoryMovementsReportViewModel temp in q)
+                foreach (InventoryMovementsMonthlyReportViewModel temp in q)
                 {
-                    InventoryMovementsReportViewModel dup = Array.Find(dateSpan, o => o.Date.Date.ToString() == temp.Date.Date.ToString());
+                    InventoryMovementsMonthlyReportViewModel dup = Array.Find(dateSpan, o => o.Date.ToString() == temp.Date.ToString());
                     if (dup != null)
                     {
                         if (dup.count == 0)
@@ -787,7 +773,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                 foreach (var item in q)
                 {
-                    result.Rows.Add(item.count, item.Date.Date, item.SourceName, item.DestinationName, item.ItemCode, item.ItemName,
+                    result.Rows.Add(item.count, item.Date, item.SourceName, item.DestinationName, item.ItemCode, item.ItemName,
                         item.ItemArticleRealizationOrder, item.ItemDomesticSale,
                         item.Type, item.Before, item.Quantity, item.After, item.Reference, item.Remark);
                 }
@@ -851,31 +837,31 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                 foreach (var b in Query)
                 {
-                    if (Date.TryGetValue(b.Date.Date.ToString(), out value))
+                    if (Date.TryGetValue(b.Date.ToString(), out value))
                     {
-                        Date[b.Date.Date.ToString()]++;
+                        Date[b.Date.ToString()]++;
                     }
                     else
                     {
-                        Date[b.Date.Date.ToString()] = 1;
+                        Date[b.Date.ToString()] = 1;
                     }
 
-                    if (DateStorage.TryGetValue(b.Date.Date.ToString() + b.SourceName + b.DestinationName, out value))
+                    if (DateStorage.TryGetValue(b.Date.ToString() + b.SourceName + b.DestinationName, out value))
                     {
-                        DateStorage[b.Date.Date.ToString() + b.SourceName + b.DestinationName]++;
+                        DateStorage[b.Date.ToString() + b.SourceName + b.DestinationName]++;
                     }
                     else
                     {
-                        DateStorage[b.Date.Date.ToString() + b.SourceName + b.DestinationName] = 1;
+                        DateStorage[b.Date.ToString() + b.SourceName + b.DestinationName] = 1;
                     }
 
-                    if (DateStorageItem.TryGetValue(b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode, out value))
+                    if (DateStorageItem.TryGetValue(b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode, out value))
                     {
-                        DateStorageItem[b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode]++;
+                        DateStorageItem[b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode]++;
                     }
                     else
                     {
-                        DateStorageItem[b.Date.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode] = 1;
+                        DateStorageItem[b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode] = 1;
                     }
                 }
 
