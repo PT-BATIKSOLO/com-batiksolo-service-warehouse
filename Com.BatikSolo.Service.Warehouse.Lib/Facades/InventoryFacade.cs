@@ -1046,13 +1046,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var earlyStock = (from a in movementStock
                               orderby a.CreatedUtc descending
-                              where a.CreatedUtc < firstDay
-                              group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
+                              where a.CreatedUtc < firstDay 
+                              group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
                                
                               select new StockPerItemViewModel
                               {
                                   ItemCode = aa.Key.ItemCode,
-                                  ItemName = aa.Key.ItemName,
+                                  ItemName = aa.FirstOrDefault().ItemName,
                                   StorageCode = aa.Key.StorageCode,
                                   StorageName = aa.Key.StorageName,
                                   Quantity = aa.FirstOrDefault().After,
@@ -1078,20 +1078,20 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var lateStock = (from a in movementStock
                              orderby a.CreatedUtc descending
-                             where a.CreatedUtc <= lastDay
-                             group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
+                             where a.CreatedUtc <= lastDay 
+                             group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
 
                              select new StockPerItemViewModel
                              {
                                  ItemCode = aa.Key.ItemCode,
-                                 ItemName = aa.Key.ItemName,
+                                 ItemName = aa.FirstOrDefault().ItemName,
                                  StorageCode = aa.Key.StorageCode,
                                  StorageName = aa.Key.StorageName,
                                  Quantity = aa.FirstOrDefault().After,
                                  HPP = (aa.FirstOrDefault().ItemDomesticCOGS > 0 ? aa.FirstOrDefault().ItemDomesticCOGS : aa.FirstOrDefault().ItemInternationalCOGS) * aa.FirstOrDefault().After,
                                  Sale = (aa.FirstOrDefault().ItemDomesticSale > 0 ? aa.FirstOrDefault().ItemDomesticSale : aa.FirstOrDefault().ItemInternationalSale) * aa.FirstOrDefault().After
                              });
-
+            
             var overallLateStock = (from b in lateStock
                                     group b by new { b.StorageCode, b.StorageName } into bb
 
@@ -1157,6 +1157,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                                    HPP = (aa.FirstOrDefault().ItemDomesticCOGS > 0 ? aa.FirstOrDefault().ItemDomesticCOGS : aa.FirstOrDefault().ItemInternationalCOGS) * aa.FirstOrDefault().After,
                                    Sale = (aa.FirstOrDefault().ItemDomesticSale > 0 ? aa.FirstOrDefault().ItemDomesticSale : aa.FirstOrDefault().ItemInternationalSale) * aa.FirstOrDefault().After
                                });
+
             var _LatestStock = (from b in LatestStock
                                 where b.Quantity > 0
                                 select b);
