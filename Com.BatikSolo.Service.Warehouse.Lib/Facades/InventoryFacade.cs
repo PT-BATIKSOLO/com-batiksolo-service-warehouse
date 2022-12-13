@@ -1047,12 +1047,12 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             var earlyStock = (from a in movementStock
                               orderby a.CreatedUtc descending
                               where a.CreatedUtc < firstDay 
-                              group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
+                              group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
                                
                               select new StockPerItemViewModel
                               {
                                   ItemCode = aa.Key.ItemCode,
-                                  ItemName = aa.Key.ItemName,
+                                  ItemName = aa.FirstOrDefault().ItemName,
                                   StorageCode = aa.Key.StorageCode,
                                   StorageName = aa.Key.StorageName,
                                   Quantity = aa.FirstOrDefault().After,
