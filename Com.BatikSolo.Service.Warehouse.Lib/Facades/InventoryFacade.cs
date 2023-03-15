@@ -623,8 +623,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                          join d in dbContext.Inventories 
                          on new {c.ItemCode, c.StorageCode} equals new {d.ItemCode, d.StorageCode}
                          where c.IsDeleted == false
-                         && c.CreatedUtc >= firstDay
-                         && c.CreatedUtc <= lastDay
+                         && c.CreatedUtc.Date >= firstDay.Date
+                         && c.CreatedUtc.Date <= lastDay.Date
                          orderby c.Date, c.StorageCode, c.ItemCode
                          select new InventoryMovementsReportViewModel
                          {
@@ -970,7 +970,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         public IEnumerable<MonthlyStockViewModel> GetMonthlyStockQuery(DateTime firstDay, DateTime lastDay)
         {
             var movementStock = (from a in dbContext.InventoryMovements
-                                 where a.CreatedUtc <= lastDay
+                                 where a.CreatedUtc.Date <= lastDay.Date
                                  && a.IsDeleted == false
                                  select new
                                  {
@@ -989,7 +989,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var earlyStock = (from a in movementStock
                               orderby a.CreatedUtc descending
-                              where a.CreatedUtc < firstDay
+                              where a.CreatedUtc.Date < firstDay.Date
                               group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
                                
                               select new StockPerItemViewModel
@@ -1021,7 +1021,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var lateStock = (from a in movementStock
                              orderby a.CreatedUtc descending
-                             where a.CreatedUtc <= lastDay
+                             where a.CreatedUtc.Date <= lastDay.Date
                              group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
 
                              select new StockPerItemViewModel
@@ -1086,7 +1086,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         {
             var LatestStock = (from a in dbContext.InventoryMovements
                                orderby a.CreatedUtc descending
-                               where a.CreatedUtc <= date
+                               where a.CreatedUtc.Date <= date.Date
                                && a.StorageCode == code
                                group a by new { a.ItemCode } into aa
 
