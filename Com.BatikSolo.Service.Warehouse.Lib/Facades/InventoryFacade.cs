@@ -618,37 +618,35 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         //    return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Territory") }, true);
         //}
 
-        //public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
-        //{
-        //    var Query = (from c in dbContext.InventoryMovements
-        //                 join d in dbContext.Inventories
-        //                 on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
-        //                 where c.IsDeleted == false
-        //                 && c.Date.AddHours(7).Date >= firstDay.Date
-        //                 && c.Date.AddHours(7).Date <= lastDay.Date
-        //                 orderby c.Date, c.StorageCode, c.ItemCode
-        //                 select new InventoryMovementsReportViewModel
-        //                 {
-        //                     Date = c.Date,
-        //                     ItemCode = c.ItemCode,
-        //                     ItemName = c.ItemName,
-        //                     ItemArticleRealizationOrder = d.ItemArticleRealizationOrder,
-        //                     ItemSize = c.ItemSize,
-        //                     ItemUom = c.ItemUom,
-        //                     ItemDomesticSale = c.ItemDomesticSale,
-        //                     Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
-        //                     Before = c.Before,
-        //                     After = c.After,
-        //                     Type = c.Type,
-        //                     Reference = c.Reference,
-        //                     Remark = c.Remark,
-        //                     StorageId = c.StorageId,
-        //                     StorageCode = c.StorageCode,
-        //                     StorageName = c.StorageName,
-        //                     CreatedUtc = c.CreatedUtc,
-        //                     SourceName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault(),
-        //                     DestinationName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault()
-        //                 }).OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
+        public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
+        {
+            var Query = (from c in dbContext.InventoryMovements
+                         join d in dbContext.Inventories 
+                         on new {c.ItemCode, c.StorageCode} equals new {d.ItemCode, d.StorageCode}
+                         where c.IsDeleted == false
+                         && c.CreatedUtc.Date >= firstDay.Date
+                         && c.CreatedUtc.Date <= lastDay.Date
+                         orderby c.Date, c.StorageCode, c.ItemCode
+                         select new InventoryMovementsReportViewModel
+                         {
+                             Date = c.Date,
+                             ItemCode = c.ItemCode,
+                             ItemName = c.ItemName,
+                             ItemArticleRealizationOrder = d.ItemArticleRealizationOrder,
+                             ItemSize = c.ItemSize,
+                             ItemUom = c.ItemUom,
+                             ItemDomesticSale = c.ItemDomesticSale,
+                             Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
+                             Before = c.Before,
+                             After = c.After,
+                             Type = c.Type,
+                             Reference = c.Reference,
+                             Remark = c.Remark,
+                             StorageId = c.StorageId,
+                             StorageCode = c.StorageCode,
+                             StorageName = c.StorageName,
+                             CreatedUtc = c.CreatedUtc,
+                         }).OrderBy(a=>a.Date.Date).ThenBy(a=>a.StorageCode).ThenBy(a=>a.ItemCode);
 
         //    return Query;
         //}
@@ -1027,7 +1025,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         public IEnumerable<MonthlyStockViewModel> GetMonthlyStockQuery(DateTime firstDay, DateTime lastDay)
         {
             var movementStock = (from a in dbContext.InventoryMovements
-                                 where a.CreatedUtc <= lastDay
+                                 where a.CreatedUtc.Date <= lastDay.Date
                                  && a.IsDeleted == false
                                  select new
                                  {
@@ -1046,8 +1044,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var earlyStock = (from a in movementStock
                               orderby a.CreatedUtc descending
-                              where a.CreatedUtc < firstDay 
-                              group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
+                              where a.CreatedUtc.Date < firstDay.Date
+                              group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
                                
                               select new StockPerItemViewModel
                               {
@@ -1078,8 +1076,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var lateStock = (from a in movementStock
                              orderby a.CreatedUtc descending
-                             where a.CreatedUtc <= lastDay 
-                             group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
+                             where a.CreatedUtc.Date <= lastDay.Date
+                             group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
 
                              select new StockPerItemViewModel
                              {
@@ -1143,7 +1141,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         {
             var LatestStock = (from a in dbContext.InventoryMovements
                                orderby a.CreatedUtc descending
-                               where a.CreatedUtc <= date
+                               where a.CreatedUtc.Date <= date.Date
                                && a.StorageCode == code
                                group a by new { a.ItemCode } into aa
 
