@@ -24,7 +24,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel
         //public string reference { get; set; }
         //public SourceViewModel source { get; set; }
         //public int sPKDocsId { get; set; }
-        public int weight { get; set; }
+        public double weight { get; set; }
 
         public List<ExpeditionDetailViewModel> details { get; set; }
     }

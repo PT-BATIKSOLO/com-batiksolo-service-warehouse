@@ -10,6 +10,7 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -409,7 +410,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                          select new InventoryMovementsReportViewModel
                          {
-                             Date = c.Date,
+                             Date =c.Date,
                              ItemCode = c.ItemCode,
                              ItemName = c.ItemName,
                              ItemArticleRealizationOrder = c.ItemArticleRealizationOrder,
@@ -448,10 +449,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 Query = Query.OrderBy(string.Concat(Key, " ", OrderType));
             }
 
-            Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
+            //Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
             //List<InventoriesReportViewModel> Data = Query.ToList<InventoriesReportViewModel>();
-            List<InventoryMovementsReportViewModel> Data = pageable.Data.ToList<InventoryMovementsReportViewModel>();
-            int TotalData = pageable.TotalCount;
+            List<InventoryMovementsReportViewModel> Data = Query.ToList<InventoryMovementsReportViewModel>();
+            int TotalData = Query.Count();
 
             //return Tuple.Create(Data, Data.Count());
             return Tuple.Create(Data, TotalData);
@@ -647,10 +648,57 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              CreatedUtc = c.CreatedUtc,
                          }).OrderBy(a=>a.Date.Date).ThenBy(a=>a.StorageCode).ThenBy(a=>a.ItemCode);
 
-            return Query;
+        //    return Query;
+        //}
+        
+        public IQueryable<InventoryMovementsMonthlyReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
+        {
+            SqlConnection conn = new SqlConnection("Server=batiksolo-db-server.database.windows.net,1433;Database=batiksolo-db-warehouse;User=batiksoloprd;password=batiksolo123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
+            conn.Open();
+            SqlCommand command = new SqlCommand(
+                "SELECT[After], a.CreatedUtc,[Before],  CONVERT(Date, a.Date) Date,[ItemArticleRealizationOrder],[ItemCode],[ItemDomesticSale],[ItemInternationalSale],[ItemName] " +
+                ",[ItemSize],[ItemUom],[Quantity], a.[Reference], a.[Remark],[StorageCode],[StorageId],[StorageName],[Type]" +
+                ", case when type = 'IN' then(select top 1 SourceName from TransferInDocs where isdeleted = 0 and TransferInDocs.code=a.reference) " +
+                "		else (select top 1 SourceName from TransferOutDocs where isdeleted = 0 and TransferOutDocs.code=a.reference) end as SourceName" +
+                ", case when type = 'IN' then(select top 1 DestinationName from TransferInDocs where isdeleted = 0 and TransferInDocs.code=a.reference)" +
+                "		else (select top 1 DestinationName from TransferOutDocs where isdeleted = 0 and TransferOutDocs.code=a.reference) end as DestinationName" +
+                " FROM[dbo].[InventoryMovements] a" +
+                " where Month(a.Date) = "+ lastDay.Month + " and Year(a.Date)= " + lastDay.Year + " and a.IsDeleted = 0", conn);
+            List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
+            using (SqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    // var date = Convert.ToDateTime(reader["Date"].ToString());
+                    InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
+                    {
+                        Date = reader["Date"].ToString(),
+                        ItemCode = reader["ItemCode"].ToString(),
+                        ItemName = reader["ItemName"].ToString(),
+                        ItemArticleRealizationOrder = reader["ItemArticleRealizationOrder"].ToString(),
+                        ItemSize = reader["ItemSize"].ToString(),
+                        ItemUom = reader["ItemUom"].ToString(),
+                        ItemDomesticSale = Convert.ToDouble(reader["ItemDomesticSale"]),
+                        Quantity = reader["Type"].ToString() == "OUT" ? -Convert.ToInt32(reader["Quantity"]) : Convert.ToInt32(reader["Quantity"]),
+                        Before = Convert.ToDouble(reader["Before"]),
+                        After = Convert.ToDouble(reader["After"]),
+                        Type = reader["Type"].ToString(),
+                        Reference = reader["Reference"].ToString(),
+                        Remark = reader["Remark"].ToString(),
+                        StorageId = Convert.ToInt32(reader["StorageId"]),
+                        StorageCode = reader["StorageCode"].ToString(),
+                        StorageName = reader["StorageName"].ToString(),
+                        CreatedUtc = (Convert.ToDateTime(reader["CreatedUtc"])),
+                        SourceName = reader["SourceName"].ToString(),
+                        DestinationName = reader["DestinationName"].ToString()
+                    };
+                    dataList.Add(data);
+                }
+            }
+            return dataList.AsQueryable().OrderBy(a => a.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
         }
 
-        public Tuple<List<InventoryMovementsReportViewModel>, int> GetMovementsByDate(string _month, string _year, int page = 1, int size = 25)
+        public Tuple<List<InventoryMovementsMonthlyReportViewModel>, int> GetMovementsByDate(string _month, string _year, int page = 1, int size = 25)
         {
             var month = Convert.ToInt32(_month);
             var year = Convert.ToInt32(_year);
@@ -660,8 +708,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var Query = GetMovementByDateQuery(firstDay, lastDay);
 
-            Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
-            List<InventoryMovementsReportViewModel> Data = pageable.Data.ToList<InventoryMovementsReportViewModel>();
+            Pageable<InventoryMovementsMonthlyReportViewModel> pageable = new Pageable<InventoryMovementsMonthlyReportViewModel>(Query, page - 1, size);
+            List<InventoryMovementsMonthlyReportViewModel> Data = pageable.Data.ToList<InventoryMovementsMonthlyReportViewModel>();
             int TotalData = pageable.TotalCount;
 
             return Tuple.Create(Data, TotalData);
@@ -679,12 +727,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             var Query = GetMovementByDateQuery(firstDay, lastDay);
 
             DataTable result = new DataTable();
-            var headers = new string[] { "No", "Tanggal", "Kode Toko", "Nama Toko", "Barcode", "Nama Barang", "RO", "Harga", "Tipe", "Sebelum", "Kuantitas", "Setelah", "Referensi", "Keterangan" };
+            var headers = new string[] { "No", "Tanggal", "Asal", "Tujuan", "Barcode", "Nama Barang", "RO", "Harga", "Tipe", "Sebelum", "Kuantitas", "Setelah", "Referensi", "Keterangan" };
 
             result.Columns.Add(new DataColumn() { ColumnName = "No", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Tanggal", DataType = typeof(String) });
-            result.Columns.Add(new DataColumn() { ColumnName = "Kode Toko", DataType = typeof(String) });
-            result.Columns.Add(new DataColumn() { ColumnName = "Nama Toko", DataType = typeof(String) });
+            //result.Columns.Add(new DataColumn() { ColumnName = "Kode Toko", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Asal", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tujuan", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Barcode", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Nama Barang", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "RO", DataType = typeof(String) });
@@ -706,12 +755,12 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 var q = Query.ToList();
                 var index = 0;
 
-                foreach(InventoryMovementsReportViewModel temp in q)
+                foreach (InventoryMovementsMonthlyReportViewModel temp in q)
                 {
-                    InventoryMovementsReportViewModel dup = Array.Find(dateSpan, o => o.Date.Date.ToString() == temp.Date.Date.ToString());
-                    if(dup != null)
+                    InventoryMovementsMonthlyReportViewModel dup = Array.Find(dateSpan, o => o.Date.ToString() == temp.Date.ToString());
+                    if (dup != null)
                     {
-                        if(dup.count == 0)
+                        if (dup.count == 0)
                         {
                             index++;
                             dup.count = index;
@@ -722,7 +771,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                 foreach (var item in q)
                 {
-                    result.Rows.Add(item.count, item.Date.Date, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName,
+                    result.Rows.Add(item.count, item.Date, item.SourceName, item.DestinationName, item.ItemCode, item.ItemName,
                         item.ItemArticleRealizationOrder, item.ItemDomesticSale,
                         item.Type, item.Before, item.Quantity, item.After, item.Reference, item.Remark);
                 }
@@ -772,6 +821,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 sheet.Cells["L5"].Value = headers[11];
                 sheet.Cells["M5"].Value = headers[12];
                 sheet.Cells["N5"].Value = headers[13];
+                //sheet.Cells["O5"].Value = headers[14];
 
                 var widths = new int[] { 5, 10, 10, 10, 15, 20, 10, 10, 5, 5, 5, 5, 15, 10 };
 
@@ -783,33 +833,33 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 var data = Query.ToArray();
                 int value;
 
-                foreach(var b in Query)
+                foreach (var b in Query)
                 {
-                    if(Date.TryGetValue(b.Date.Date.ToString(), out value))
+                    if (Date.TryGetValue(b.Date.ToString(), out value))
                     {
-                        Date[b.Date.Date.ToString()]++;
+                        Date[b.Date.ToString()]++;
                     }
                     else
                     {
-                        Date[b.Date.Date.ToString()] = 1;
+                        Date[b.Date.ToString()] = 1;
                     }
 
-                    if (DateStorage.TryGetValue(b.Date.Date.ToString()+b.StorageCode, out value))
+                    if (DateStorage.TryGetValue(b.Date.ToString() + b.SourceName + b.DestinationName, out value))
                     {
-                        DateStorage[b.Date.Date.ToString()+b.StorageCode]++;
+                        DateStorage[b.Date.ToString() + b.SourceName + b.DestinationName]++;
                     }
                     else
                     {
-                        DateStorage[b.Date.Date.ToString()+b.StorageCode] = 1;
+                        DateStorage[b.Date.ToString() + b.SourceName + b.DestinationName] = 1;
                     }
 
-                    if (DateStorageItem.TryGetValue(b.Date.Date.ToString()+b.StorageCode+b.ItemCode, out value))
+                    if (DateStorageItem.TryGetValue(b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode, out value))
                     {
-                        DateStorageItem[b.Date.Date.ToString()+b.StorageCode+b.ItemCode]++;
+                        DateStorageItem[b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode]++;
                     }
                     else
                     {
-                        DateStorageItem[b.Date.Date.ToString() + b.StorageCode + b.ItemCode] = 1;
+                        DateStorageItem[b.Date.ToString() + b.SourceName + b.DestinationName + b.ItemCode] = 1;
                     }
                 }
 
@@ -817,7 +867,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 int index_2 = 7;
                 int index_3 = 7;
 
-                foreach(KeyValuePair<string, int> b in Date)
+                foreach (KeyValuePair<string, int> b in Date)
                 {
                     sheet.Cells["A" + index_1 + ":A" + (index_1 + b.Value - 1)].Merge = true;
                     sheet.Cells["A" + index_1 + ":A" + (index_1 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
@@ -852,6 +902,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                     sheet.Cells["H" + index_3 + ":H" + (index_3 + b.Value - 1)].Merge = true;
                     sheet.Cells["H" + index_3 + ":H" + (index_3 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+
+                    //sheet.Cells["I" + index_3 + ":I" + (index_3 + b.Value - 1)].Merge = true;
+                    //sheet.Cells["I" + index_3 + ":I" + (index_3 + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+
                     index_3 += b.Value;
                 }
             }
@@ -860,6 +914,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             package.SaveAs(stream);
             return stream;
         }
+
 
         #endregion
 
@@ -995,7 +1050,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                               select new StockPerItemViewModel
                               {
                                   ItemCode = aa.Key.ItemCode,
-                                  ItemName = aa.Key.ItemName,
+                                  ItemName = aa.FirstOrDefault().ItemName,
                                   StorageCode = aa.Key.StorageCode,
                                   StorageName = aa.Key.StorageName,
                                   Quantity = aa.FirstOrDefault().After,
@@ -1027,14 +1082,14 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              select new StockPerItemViewModel
                              {
                                  ItemCode = aa.Key.ItemCode,
-                                 ItemName = aa.Key.ItemName,
+                                 ItemName = aa.FirstOrDefault().ItemName,
                                  StorageCode = aa.Key.StorageCode,
                                  StorageName = aa.Key.StorageName,
                                  Quantity = aa.FirstOrDefault().After,
                                  HPP = (aa.FirstOrDefault().ItemDomesticCOGS > 0 ? aa.FirstOrDefault().ItemDomesticCOGS : aa.FirstOrDefault().ItemInternationalCOGS) * aa.FirstOrDefault().After,
                                  Sale = (aa.FirstOrDefault().ItemDomesticSale > 0 ? aa.FirstOrDefault().ItemDomesticSale : aa.FirstOrDefault().ItemInternationalSale) * aa.FirstOrDefault().After
                              });
-
+            
             var overallLateStock = (from b in lateStock
                                     group b by new { b.StorageCode, b.StorageName } into bb
 
@@ -1100,6 +1155,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                                    HPP = (aa.FirstOrDefault().ItemDomesticCOGS > 0 ? aa.FirstOrDefault().ItemDomesticCOGS : aa.FirstOrDefault().ItemInternationalCOGS) * aa.FirstOrDefault().After,
                                    Sale = (aa.FirstOrDefault().ItemDomesticSale > 0 ? aa.FirstOrDefault().ItemDomesticSale : aa.FirstOrDefault().ItemInternationalSale) * aa.FirstOrDefault().After
                                });
+
             var _LatestStock = (from b in LatestStock
                                 where b.Quantity > 0
                                 select b);

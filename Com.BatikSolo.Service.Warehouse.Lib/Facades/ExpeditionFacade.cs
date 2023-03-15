@@ -217,7 +217,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             {
                 try
                 {
-                    int totalweight = 0;
+                    double totalweight = 0;
                     string code = GenerateCode("BTS-KB/EXP");
                     
                     model.Code = code;
