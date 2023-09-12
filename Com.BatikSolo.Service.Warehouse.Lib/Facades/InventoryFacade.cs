@@ -30,7 +30,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         private readonly DbSet<InventoryMovement> dbSetMovement;
         public readonly IServiceProvider serviceProvider;
 
-       // private readonly string GarmentPreSalesContractUri = "merchandiser/garment-pre-sales-contracts/";
+        // private readonly string GarmentPreSalesContractUri = "merchandiser/garment-pre-sales-contracts/";
 
         public InventoryFacade(IServiceProvider serviceProvider, WarehouseDbContext dbContext)
         {
@@ -58,7 +58,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                          select new InventoryViewModel
                          {
-                             item = new ViewModels.NewIntegrationViewModel.ItemViewModel {
+                             item = new ViewModels.NewIntegrationViewModel.ItemViewModel
+                             {
                                  code = a.ItemCode,
                                  articleRealizationOrder = a.ItemArticleRealizationOrder
 
@@ -66,7 +67,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              //ItemArticleRealization = a.ItemArticleRealizationOrder,
                              //ItemDomesticCOGS = a.ItemDomesticCOGS,
                              quantity = a.Quantity
-                                
+
                              //Price = a.Price
 
                          });
@@ -100,7 +101,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
         public List<Inventory> getDatabyName(string itemName, int StorageId)
         {
-            var inventory = dbSet.Where(x => x.ItemName ==itemName && x.StorageId == StorageId).ToList();
+            var inventory = dbSet.Where(x => x.ItemName == itemName && x.StorageId == StorageId).ToList();
             return inventory;
 
         }
@@ -119,7 +120,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var Query = (from a in dbContext.Inventories
                          where a.IsDeleted == false
-                         && a.StorageId == Convert.ToInt64((string.IsNullOrWhiteSpace(storageId) ? a.StorageId.ToString() :  storageId))
+                         && a.StorageId == Convert.ToInt64((string.IsNullOrWhiteSpace(storageId) ? a.StorageId.ToString() : storageId))
                          //&& a.StorageCode == (string.IsNullOrWhiteSpace(storageId) ? a.StorageCode : storageId)
                          //&& a.ItemName.Contains((string.IsNullOrWhiteSpace(filter) ? a.ItemName : filter))
                          //|| a.ItemArticleRealizationOrder.Contains((string.IsNullOrWhiteSpace(filter) ? a.ItemArticleRealizationOrder : filter))
@@ -151,7 +152,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                               ItemSize = a.ItemSize,
                               ItemUom = a.ItemUom,
                               ItemDomesticSale = a.ItemDomesticSale,
-                              Quantity =  a.Quantity,
+                              Quantity = a.Quantity,
                               StorageId = a.StorageId,
                               StorageCode = a.StorageCode,
                               StorageName = a.StorageName
@@ -201,7 +202,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             result.Columns.Add(new DataColumn() { ColumnName = "Kuantitas", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Harga", DataType = typeof(String) });
             result.Columns.Add(new DataColumn() { ColumnName = "Subtotal", DataType = typeof(String) });
-           
+
             if (Query.ToArray().Count() == 0)
                 result.Rows.Add("", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0);
             // to allow column name to be generated properly for empty data as template
@@ -246,7 +247,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     subTotalQty[StoreName] += Quantity;
                     subTotalAmount[StoreName] += Amount;
                 }
-                
+
                 foreach (KeyValuePair<string, List<InventoriesReportViewModel>> StoreName in dataByToko)
                 {
                     int index = 0;
@@ -259,9 +260,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                         // string date = item.Date == null ? "-" : item.Date.ToOffset(new TimeSpan(7, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                         //string pr_date = item.PRDate == null ? "-" : item.PRDate.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                         //string do_date = item.DODate == null ? "-" : item.ReceiptDate.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
-                        
+
                         result.Rows.Add(index, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName, item.ItemArticleRealizationOrder, item.Quantity, item.ItemDomesticSale, item.Quantity * item.ItemDomesticSale);
-                        
+
                     }
                 }
             }
@@ -335,7 +336,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             // to allow column name to be generated properly for empty data as template
             else
             {
-                
+
                 Dictionary<string, List<InventoriesReportViewModel>> dataByToko = new Dictionary<string, List<InventoriesReportViewModel>>();
                 Dictionary<string, double> subTotalQty = new Dictionary<string, double>();
 
@@ -377,7 +378,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     foreach (InventoriesReportViewModel item in ItemCode.Value)
                     {
                         index++;
-                        
+
                         result.Rows.Add(index, item.StorageName, item.Quantity);
                     }
                 }
@@ -385,7 +386,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Barang") }, true);
         }
-        
+
         #endregion
 
         public Inventory getStockPOS(string sourcecode, string itemCode)
@@ -417,7 +418,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                              ItemSize = c.ItemSize,
                              ItemUom = c.ItemUom,
                              ItemDomesticSale = c.ItemDomesticSale,
-                             Quantity = c.Type == "OUT"? -c.Quantity : c.Quantity,
+                             Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
                              Before = c.Before,
                              After = c.After,
                              Type = c.Type,
@@ -484,7 +485,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
 
             if (Query.ToArray().Count() == 0)
-                result.Rows.Add("", "", "", "", "", "", "", "",0, 0, 0,"");
+                result.Rows.Add("", "", "", "", "", "", "", "", 0, 0, 0, "");
             // to allow column name to be generated properly for empty data as template
             else
             {
@@ -497,7 +498,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     //string pr_date = item.PRDate == null ? "-" : item.PRDate.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                     //string do_date = item.DODate == null ? "-" : item.ReceiptDate.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
 
-                    result.Rows.Add(index, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName, date, 
+                    result.Rows.Add(index, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName, date,
                         item.Reference, item.Type, item.Before, item.Quantity, item.After, item.Remark);
 
 
@@ -624,8 +625,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         //                 join d in dbContext.Inventories
         //                 on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
         //                 where c.IsDeleted == false
-        //                 && c.Date.AddHours(7).Date >= firstDay.Date
-        //                 && c.Date.AddHours(7).Date <= lastDay.Date
+        //                 && c.CreatedUtc.Date >= firstDay.Date
+        //                 && c.CreatedUtc.Date <= lastDay.Date
         //                 orderby c.Date, c.StorageCode, c.ItemCode
         //                 select new InventoryMovementsReportViewModel
         //                 {
@@ -646,13 +647,11 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         //                     StorageCode = c.StorageCode,
         //                     StorageName = c.StorageName,
         //                     CreatedUtc = c.CreatedUtc,
-        //                     SourceName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault(),
-        //                     DestinationName = c.Type == "IN" ? dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault()
-        //                 }).OrderBy(a => a.Date.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
+        //                 }).OrderBy(a => a.Date.Date).ThenBy(a => a.StorageCode).ThenBy(a => a.ItemCode);
 
         //    return Query;
         //}
-        
+
         public IQueryable<InventoryMovementsMonthlyReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
         {
             SqlConnection conn = new SqlConnection("Server=batiksolo-db-server.database.windows.net,1433;Database=batiksolo-db-warehouse;User=batiksoloprd;password=batiksolo123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
@@ -665,7 +664,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 ", case when type = 'IN' then(select top 1 DestinationName from TransferInDocs where isdeleted = 0 and TransferInDocs.code=a.reference)" +
                 "		else (select top 1 DestinationName from TransferOutDocs where isdeleted = 0 and TransferOutDocs.code=a.reference) end as DestinationName" +
                 " FROM[dbo].[InventoryMovements] a" +
-                " where Month(a.Date) = "+ lastDay.Month + " and Year(a.Date)= " + lastDay.Year + " and a.IsDeleted = 0", conn);
+                " where Month(a.Date) = " + lastDay.Month + " and Year(a.Date)= " + lastDay.Year + " and a.IsDeleted = 0", conn);
             List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
             using (SqlDataReader reader = command.ExecuteReader())
             {
@@ -948,7 +947,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             var itemList = new List<InventoryViewModel2>();
             var stores = getNearestStore(storageCode);
 
-            if(stores != null)
+            if (stores != null)
             {
                 foreach (var store in stores)
                 {
@@ -1001,7 +1000,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             return Query;
         }
 
-        public List<InventoryViewModel> GetAllStockByStorageId (string storageId)
+        public List<InventoryViewModel> GetAllStockByStorageId(string storageId)
         {
             var Query = GetAllStockByStorageQuery(storageId);
 
@@ -1011,7 +1010,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         #endregion
 
         #region Monthly Stock
-        public List<MonthlyStockViewModel> GetOverallMonthlyStock (string _year, string _month)
+        public List<MonthlyStockViewModel> GetOverallMonthlyStock(string _year, string _month)
         {
             var month = Convert.ToInt32(_month);
             var year = Convert.ToInt32(_year);
@@ -1023,11 +1022,11 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             return monthlyStock;
         }
-        
+
         public IEnumerable<MonthlyStockViewModel> GetMonthlyStockQuery(DateTime firstDay, DateTime lastDay)
         {
             var movementStock = (from a in dbContext.InventoryMovements
-                                 where a.CreatedUtc <= lastDay
+                                 where a.CreatedUtc.Date <= lastDay.Date
                                  && a.IsDeleted == false
                                  select new
                                  {
@@ -1046,9 +1045,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var earlyStock = (from a in movementStock
                               orderby a.CreatedUtc descending
-                              where a.CreatedUtc < firstDay 
-                              group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
-                               
+                              where a.CreatedUtc.Date < firstDay.Date
+                              group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
+
                               select new StockPerItemViewModel
                               {
                                   ItemCode = aa.Key.ItemCode,
@@ -1062,15 +1061,15 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                               });
 
             var overallEarlyStock = (from b in earlyStock
-                                     group b by new {b.StorageCode, b.StorageName} into bb
+                                     group b by new { b.StorageCode, b.StorageName } into bb
 
                                      select new MonthlyStockViewModel
                                      {
                                          StorageCode = bb.Key.StorageCode,
                                          StorageName = bb.Key.StorageName,
-                                         EarlyQuantity = bb.Sum(x=>x.Quantity),
-                                         EarlyHPP = bb.Sum(x=>x.HPP),
-                                         EarlySale = bb.Sum(x=>x.Sale),
+                                         EarlyQuantity = bb.Sum(x => x.Quantity),
+                                         EarlyHPP = bb.Sum(x => x.HPP),
+                                         EarlySale = bb.Sum(x => x.Sale),
                                          LateQuantity = 0,
                                          LateHPP = 0,
                                          LateSale = 0
@@ -1078,8 +1077,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             var lateStock = (from a in movementStock
                              orderby a.CreatedUtc descending
-                             where a.CreatedUtc <= lastDay 
-                             group a by new { a.ItemCode, a.StorageCode, a.StorageName } into aa
+                             where a.CreatedUtc.Date <= lastDay.Date
+                             group a by new { a.ItemCode, a.ItemName, a.StorageCode, a.StorageName } into aa
 
                              select new StockPerItemViewModel
                              {
@@ -1091,7 +1090,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                                  HPP = (aa.FirstOrDefault().ItemDomesticCOGS > 0 ? aa.FirstOrDefault().ItemDomesticCOGS : aa.FirstOrDefault().ItemInternationalCOGS) * aa.FirstOrDefault().After,
                                  Sale = (aa.FirstOrDefault().ItemDomesticSale > 0 ? aa.FirstOrDefault().ItemDomesticSale : aa.FirstOrDefault().ItemInternationalSale) * aa.FirstOrDefault().After
                              });
-            
+
             var overallLateStock = (from b in lateStock
                                     group b by new { b.StorageCode, b.StorageName } into bb
 
@@ -1102,26 +1101,26 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                                         EarlyQuantity = 0,
                                         EarlyHPP = 0,
                                         EarlySale = 0,
-                                        LateQuantity = bb.Sum(x=>x.Quantity),
-                                        LateHPP = bb.Sum(x=>x.HPP),
-                                        LateSale = bb.Sum(x=>x.Sale)
+                                        LateQuantity = bb.Sum(x => x.Quantity),
+                                        LateHPP = bb.Sum(x => x.HPP),
+                                        LateSale = bb.Sum(x => x.Sale)
                                     });
 
             var overallMonthlyStock = overallEarlyStock.Union(overallLateStock).ToList();
 
             var data = (from query in overallMonthlyStock
-                        group query by new { query.StorageCode, query.StorageName} into groupdata
+                        group query by new { query.StorageCode, query.StorageName } into groupdata
 
                         select new MonthlyStockViewModel
                         {
                             StorageCode = groupdata.Key.StorageCode,
                             StorageName = groupdata.Key.StorageName,
-                            EarlyQuantity = groupdata.Sum(x=>x.EarlyQuantity),
-                            EarlyHPP = groupdata.Sum(x=>x.EarlyHPP),
-                            EarlySale = groupdata.Sum(x=>x.EarlySale),
-                            LateQuantity = groupdata.Sum(x=>x.LateQuantity),
-                            LateHPP = groupdata.Sum(x=>x.LateHPP),
-                            LateSale = groupdata.Sum(x=>x.LateSale)
+                            EarlyQuantity = groupdata.Sum(x => x.EarlyQuantity),
+                            EarlyHPP = groupdata.Sum(x => x.EarlyHPP),
+                            EarlySale = groupdata.Sum(x => x.EarlySale),
+                            LateQuantity = groupdata.Sum(x => x.LateQuantity),
+                            LateHPP = groupdata.Sum(x => x.LateHPP),
+                            LateSale = groupdata.Sum(x => x.LateSale)
                         });
 
             return data.AsQueryable();
@@ -1143,7 +1142,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
         {
             var LatestStock = (from a in dbContext.InventoryMovements
                                orderby a.CreatedUtc descending
-                               where a.CreatedUtc <= date
+                               where a.CreatedUtc.Date <= date.Date
                                && a.StorageCode == code
                                group a by new { a.ItemCode } into aa
 
@@ -1165,7 +1164,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             return _LatestStock.AsQueryable();
         }
 
-        public MemoryStream GenerateExcelForLatestStockByStorage (string code, string _month, string _year)
+        public MemoryStream GenerateExcelForLatestStockByStorage(string code, string _month, string _year)
         {
             var month = Convert.ToInt32(_month);
             var year = Convert.ToInt32(_year);
@@ -1233,7 +1232,8 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                          group new { a, b, bb, bbb } by new { a.StorageCode, a.StorageName, a.ItemCode, a.ItemArticleRealizationOrder, a.ItemSize, a.Quantity, bb.DestinationCode, bbb.CreatedUtc } into data
 
-                         select new InventoryByRoReportViewModel {
+                         select new InventoryByRoReportViewModel
+                         {
                              //StorageId = data.FirstOrDefault().a.StorageId,
                              code = data.Key.StorageCode,
                              storageName = data.Key.StorageName,
@@ -1258,9 +1258,9 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                          && b.ItemCode == a.itemCode
                          && a.IsDeleted == false
                          && b.IsDeleted == false
-                         
+
                          orderby a.age descending
-                         
+
                          //group new { a, b } by new { a.code, a.storageName, a.destinationCode, a.ro, a.size, b.ItemCode} into data
 
                          select new InventoryByRoReportViewModel
@@ -1281,7 +1281,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             //var Query2 = getSalesPerRo(articleRealizationOrder).AsQueryable();
 
             return Total;
-            
+
         }
 
         private List<SalesDocByRoViewModel> GetSalesPerRo(string articleRealizationOrder)
@@ -1291,7 +1291,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             //string posUri = itemUri + queryUri;
             IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
             var response = httpClient.GetAsync($"{APIEndpoint.POS}{itemUri}/{articleRealizationOrder}").Result;
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var content = response.Content.ReadAsStringAsync().Result;
@@ -1304,10 +1304,10 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 List<SalesDocByRoViewModel> viewModel = null;
                 return viewModel;
             }
-            
+
         }
 
-        public MemoryStream GenerateExcelStokByRO (string ro)
+        public MemoryStream GenerateExcelStokByRO(string ro)
         {
             var Query = GetInventoryByRoQuery(ro);
             var data = Query.ToList();
@@ -1353,7 +1353,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                         quantityOnInventory = item.quantityOnInventory,
                         quantityOnSales = item.quantityOnSales,
                     });
-                    
+
                     if (!totalStok.ContainsKey(StorageName))
                     {
                         totalStok.Add(StorageName, 0);
@@ -1363,7 +1363,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     {
                         totalTerjual.Add(StorageName, 0);
                     };
-                    
+
                     totalStok[StorageName] += item.quantityOnInventory;
                     totalTerjual[StorageName] += item.quantityOnSales;
                 }
@@ -1376,15 +1376,15 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     foreach (InventoryByRoReportViewModel item in RoSize.Value)
                     {
                         index++;
-                        
+
                         string sizeStock = string.Format("{0}", item.quantityOnInventory);
                         string sizeTerjual = string.Format("{0}", item.quantityOnSales);
 
                         result.Rows.Add(index, item.storageName, item.ro, item.size, sizeStock, sizeTerjual, item.age + " hari ");
-                        
+
                     }
 
-                    result.Rows.Add("", "", "",  "", "Total Stok : " + Math.Round(totalStok[RoSize.Key], 2), "Total Stok Terjual : " + Math.Round(totalTerjual[RoSize.Key], 2));
+                    result.Rows.Add("", "", "", "", "Total Stok : " + Math.Round(totalStok[RoSize.Key], 2), "Total Stok Terjual : " + Math.Round(totalTerjual[RoSize.Key], 2));
 
                     rowPosition += 1;
                 }
@@ -1482,13 +1482,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                                                     CreatedUtc = a.CreatedUtc
                                                 })
 
-                                     group aa by new { aa.ItemCode, aa.StorageCode } into groupdata
-                                     select new
-                                     {
-                                         ItemCode = groupdata.Key.ItemCode,
-                                         StorageCode = groupdata.Key.StorageCode,
-                                         CreatedUtc = groupdata.FirstOrDefault().CreatedUtc
-                                     };
+                                    group aa by new { aa.ItemCode, aa.StorageCode } into groupdata
+                                    select new
+                                    {
+                                        ItemCode = groupdata.Key.ItemCode,
+                                        StorageCode = groupdata.Key.StorageCode,
+                                        CreatedUtc = groupdata.FirstOrDefault().CreatedUtc
+                                    };
 
             //foreach (var i in QueryOverallStocks1)
             //{
@@ -1586,7 +1586,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                     {
                         subTotalQty.Add(StoreName, 0);
                     };
-                    
+
                     double Quantity = item.Quantity;
 
                     subTotalQty[StoreName] += Quantity;
@@ -1610,10 +1610,330 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
                 }
             }
-            
+
             return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Age") }, true);
         }
 
+        #endregion
+
+
+        #region GetStockAll
+        public Tuple<List<InventoryMovementsMonthlyReportViewModel>, int> GetStockAll(string storageId, string SelectedQuantity, int page = 1, int size = 25)
+        {
+
+
+            var Query = GetStockAllQuery(storageId, SelectedQuantity);
+
+            Pageable<InventoryMovementsMonthlyReportViewModel> pageable = new Pageable<InventoryMovementsMonthlyReportViewModel>(Query, page - 1, size);
+            List<InventoryMovementsMonthlyReportViewModel> Data = pageable.Data.ToList<InventoryMovementsMonthlyReportViewModel>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData);
+        }
+        public IQueryable<InventoryMovementsMonthlyReportViewModel> GetStockAllQuery(string storageId, string SelectedQuantity)
+        {
+
+            //var builder = new ConfigurationBuilder()
+            //              .SetBasePath(Directory.GetCurrentDirectory())
+            //              .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            //IConfiguration _configuration = builder.Build();
+            //var myConnectionString1 = _configuration.GetConnectionString("DefaultConnection");
+            //SqlConnection conn = new SqlConnection(myConnectionString1);
+            SqlConnection conn = new SqlConnection("Server=batiksolo-db-server.database.windows.net,1433;Database=batiksolo-db-warehouse;User=batiksoloprd;password=batiksolo123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
+            if (SelectedQuantity == "0")
+            {
+                SelectedQuantity = "= 0";
+            }
+            conn.Open();
+            if (storageId != "0")
+            {
+                SqlCommand command = new SqlCommand(
+               "select ItemCode,ItemName, ItemDomesticSale,Quantity,CreatedUtc,StorageCode,StorageName " +
+               "from Inventories where IsDeleted = 0  and quantity " + SelectedQuantity + " and Storageid= " + storageId, conn);
+                List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // var date = Convert.ToDateTime(reader["Date"].ToString());
+                        InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
+                        {
+                            Date = Convert.ToDateTime(reader["CreatedUtc"]).ToString("MM/dd/yyyy hh:mm tt"),
+                            ItemCode = reader["ItemCode"].ToString(),
+                            ItemName = reader["ItemName"].ToString(),
+                            ItemDomesticSale = Convert.ToDouble(reader["ItemDomesticSale"]),
+                            Quantity = Convert.ToInt32(reader["Quantity"]),
+                            StorageCode = reader["StorageCode"].ToString(),
+                            StorageName = reader["StorageName"].ToString()
+
+                        };
+                        dataList.Add(data);
+                    }
+                }
+                return dataList.AsQueryable().OrderBy(a => a.Date).ThenBy(a => a.ItemCode);
+
+            }
+            else
+            {
+                SqlCommand command = new SqlCommand(
+               "Select ItemCode,ItemName, ItemDomesticSale,Quantity,CreatedUtc,StorageCode,StorageName " +
+               "from Inventories where IsDeleted = 0   and quantity " + SelectedQuantity, conn);
+                List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // var date = Convert.ToDateTime(reader["Date"].ToString());
+                        InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
+                        {
+                            Date = Convert.ToDateTime(reader["CreatedUtc"]).ToString("MM/dd/yyyy hh:mm tt"),
+                            ItemCode = reader["ItemCode"].ToString(),
+                            ItemName = reader["ItemName"].ToString(),
+                            ItemDomesticSale = Convert.ToDouble(reader["ItemDomesticSale"]),
+                            Quantity = Convert.ToInt32(reader["Quantity"]),
+                            StorageCode = reader["StorageCode"].ToString(),
+                            StorageName = reader["StorageName"].ToString()
+
+                        };
+                        dataList.Add(data);
+                    }
+                }
+                return dataList.AsQueryable();
+
+            }
+
+        }
+        public MemoryStream GenerateExcelReportStockAll(string storageId, string SelectedQuantity)
+        {
+
+
+            var Query = GetStockAllQuery(storageId, SelectedQuantity);
+
+            DataTable result = new DataTable();
+
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Code", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Name", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Domestic Sale", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Quantity", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Date", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Storage Code", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Storage Name", DataType = typeof(String) });
+
+
+            if (Query.ToArray().Count() == 0)
+                result.Rows.Add("", "", 0, 0, "", "", "");
+            // to allow column name to be generated properly for empty data as template
+            else
+            {
+                foreach (var item in Query)
+                {
+                    result.Rows.Add(item.ItemCode, item.ItemName, item.ItemDomesticSale,
+                          item.Quantity, Convert.ToDateTime(item.Date).ToString("MM/dd/yyyy hh:mm tt"), item.StorageCode, item.StorageName);
+                }
+
+            }
+            bool styling = true;
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet 1");
+
+
+                var col = (char)('A' + (result.Columns.Count - 1));
+
+
+                sheet.Cells[$"A1:{col}1"].Value = string.Format("LAPORAN INVENTORI BARANG");
+                sheet.Cells[$"A1:{col}1"].Merge = true;
+                //sheet.Cells[$"A1:{col}1"].Style.Font.Size = 15;
+                //sheet.Cells[$"A1:{col}1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;
+                //sheet.Cells[$"A1:{col}1"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                sheet.Cells[$"A1:{col}1"].Style.Font.Bold = true;
+
+                // sheet.Cells[$"A2:{col}2"].Value = string.Format("Periode {0} - {1}", tglawal, tglakhir);
+                //sheet.Cells[$"A2:{col}2"].Merge = true;
+                //sheet.Cells[$"A2:{col}2"].Style.Font.Size = 15;
+                //sheet.Cells[$"A2:{col}2"].Style.Font.Bold = true;
+                //sheet.Cells[$"A2:{col}2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;
+                //sheet.Cells[$"A2:{col}2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                sheet.Cells["A5"].LoadFromDataTable(result, true);
+                sheet.Cells[$"A5:{col}5"].Style.Font.Bold = true;
+                // sheet.Cells["A" + 6 + ":M" + (Query.Count() - 1) + ""].AutoFitColumns();
+                MemoryStream stream = new MemoryStream();
+                package.SaveAs(stream);
+                return stream;
+            }
+
+
+        }
+        #endregion
+
+        #region GetMovementAll
+        public Tuple<List<InventoryMovementsMonthlyReportViewModel>, int> GetMovementAll(string storageId, DateTime dateFrom, DateTime dateTo, int page = 1, int size = 25)
+        {
+
+
+            var Query = GetMovementAllQuery(storageId, dateFrom, dateTo);
+
+            Pageable<InventoryMovementsMonthlyReportViewModel> pageable = new Pageable<InventoryMovementsMonthlyReportViewModel>(Query, page - 1, size);
+            List<InventoryMovementsMonthlyReportViewModel> Data = pageable.Data.ToList<InventoryMovementsMonthlyReportViewModel>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData);
+        }
+        public IQueryable<InventoryMovementsMonthlyReportViewModel> GetMovementAllQuery(string storageId, DateTime dateFrom, DateTime dateTo)
+        {
+            DateTime _dateTo = dateTo == new DateTime(0001, 1, 1) ? DateTime.Now : dateTo;
+            //  DateTime _dateFrom = dateFrom == new DateTime(0001, 1, 1) ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1) : dateFrom;
+            //var builder = new ConfigurationBuilder()
+            //              .SetBasePath(Directory.GetCurrentDirectory())
+            //              .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true);
+            //IConfiguration _configuration = builder.Build();
+            //var myConnectionString1 = _configuration.GetConnectionString("DefaultConnection");
+            //SqlConnection conn = new SqlConnection(myConnectionString1);
+            SqlConnection conn = new SqlConnection("Server=batiksolo-db-server.database.windows.net,1433;Database=batiksolo-db-warehouse;User=batiksoloprd;password=batiksolo123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
+
+            conn.Open();
+            if (storageId != "0")
+            {
+                SqlCommand command = new SqlCommand(
+               "select CreatedUtc,After,Before,ItemArticleRealizationOrder,ItemCode,ItemDomesticSale,ItemName,Quantity,Reference,StorageCode,StorageName,Type,Remark " +
+               "from InventoryMovements where IsDeleted = 0 and StorageId = '" + storageId + "' and (CONVERT(Date, CreatedUtc) between '" + dateFrom.Date + "' and '" + _dateTo.Date + "'  )", conn);
+                List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // var date = Convert.ToDateTime(reader["Date"].ToString());
+                        InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
+                        {
+                            Date = Convert.ToDateTime(reader["CreatedUtc"]).ToString("MM/dd/yyyy hh:mm tt"),
+                            ItemCode = reader["ItemCode"].ToString(),
+                            ItemName = reader["ItemName"].ToString(),
+                            ItemArticleRealizationOrder = reader["ItemArticleRealizationOrder"].ToString(),
+
+                            ItemDomesticSale = Convert.ToDouble(reader["ItemDomesticSale"]),
+                            Quantity = Convert.ToInt32(reader["Quantity"]),
+                            Before = Convert.ToDouble(reader["Before"]),
+                            After = Convert.ToDouble(reader["After"]),
+                            Type = reader["Type"].ToString(),
+                            Reference = reader["Reference"].ToString(),
+                            Remark = reader["Remark"].ToString(),
+
+                            StorageCode = reader["StorageCode"].ToString(),
+                            StorageName = reader["StorageName"].ToString()
+
+                        };
+                        dataList.Add(data);
+                    }
+                }
+                return dataList.AsQueryable().OrderBy(a => a.Date).ThenBy(a => a.SourceName).ThenBy(a => a.DestinationName).ThenBy(a => a.ItemCode);
+
+            }
+            else
+            {
+                SqlCommand command = new SqlCommand(
+               "select CreatedUtc,After,Before,ItemArticleRealizationOrder,ItemCode,ItemDomesticSale,ItemName,Quantity,Reference,StorageCode,StorageName,Type,Remark " +
+               "from InventoryMovements where IsDeleted = 0  and (CONVERT(Date, CreatedUtc) between '" + dateFrom.Date + "' and '" + _dateTo.Date + "'  )", conn);
+                List<InventoryMovementsMonthlyReportViewModel> dataList = new List<InventoryMovementsMonthlyReportViewModel>();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // var date = Convert.ToDateTime(reader["Date"].ToString());
+                        InventoryMovementsMonthlyReportViewModel data = new InventoryMovementsMonthlyReportViewModel
+                        {
+                            Date = Convert.ToDateTime(reader["CreatedUtc"]).ToString("MM/dd/yyyy hh:mm tt"),
+                            ItemCode = reader["ItemCode"].ToString(),
+                            ItemName = reader["ItemName"].ToString(),
+                            ItemArticleRealizationOrder = reader["ItemArticleRealizationOrder"].ToString(),
+
+                            ItemDomesticSale = Convert.ToDouble(reader["ItemDomesticSale"]),
+                            Quantity = Convert.ToInt32(reader["Quantity"]),
+                            Before = Convert.ToDouble(reader["Before"]),
+                            After = Convert.ToDouble(reader["After"]),
+                            Type = reader["Type"].ToString(),
+                            Reference = reader["Reference"].ToString(),
+                            Remark = reader["Remark"].ToString(),
+
+                            StorageCode = reader["StorageCode"].ToString(),
+                            StorageName = reader["StorageName"].ToString()
+
+                        };
+                        dataList.Add(data);
+                    }
+                }
+                return dataList.AsQueryable();
+
+            }
+
+        }
+        public MemoryStream GenerateExcelReportMovementAll(string storageId, DateTime dateFrom, DateTime dateTo)
+        {
+
+
+            var Query = GetMovementAllQuery(storageId, dateFrom, dateTo);
+
+            DataTable result = new DataTable();
+
+            result.Columns.Add(new DataColumn() { ColumnName = "Date", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Before", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "After", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "RO", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Code", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Domestic Sale", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Item Name", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Quantity", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Reference", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Storage Code", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Storage Name", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Type", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Remark", DataType = typeof(String) });
+
+            if (Query.ToArray().Count() == 0)
+                result.Rows.Add("", 0, 0, "", "", 0, "", 0, "", "", "", "", "");
+            // to allow column name to be generated properly for empty data as template
+            else
+            {
+                foreach (var item in Query)
+                {
+                    result.Rows.Add(Convert.ToDateTime(item.Date).ToString("MM/dd/yyyy hh:mm tt"), item.Before, item.After, item.ItemArticleRealizationOrder, item.ItemCode, item.ItemDomesticSale, item.ItemName,
+                          item.Quantity, item.Reference, item.StorageCode, item.StorageName, item.Type, item.Remark);
+                }
+
+            }
+            bool styling = true;
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Sheet 1");
+
+
+                var col = (char)('A' + (result.Columns.Count - 1));
+                string tglawal = dateFrom.ToString("dd MMM yyyy", new CultureInfo("id-ID"));
+                string tglakhir = dateTo.ToString("dd MMM yyyy", new CultureInfo("id-ID"));
+
+                sheet.Cells[$"A1:{col}1"].Value = string.Format("LAPORAN MUTASI BARANG");
+                sheet.Cells[$"A1:{col}1"].Merge = true;
+                sheet.Cells[$"A1:{col}1"].Style.Font.Size = 15;
+                sheet.Cells[$"A1:{col}1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;
+                sheet.Cells[$"A1:{col}1"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                sheet.Cells[$"A1:{col}1"].Style.Font.Bold = true;
+
+                sheet.Cells[$"A2:{col}2"].Value = string.Format("Periode {0} - {1}", tglawal, tglakhir);
+                sheet.Cells[$"A2:{col}2"].Merge = true;
+                sheet.Cells[$"A2:{col}2"].Style.Font.Size = 15;
+                sheet.Cells[$"A2:{col}2"].Style.Font.Bold = true;
+                sheet.Cells[$"A2:{col}2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;
+                sheet.Cells[$"A2:{col}2"].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                sheet.Cells["A5"].LoadFromDataTable(result, true, (styling == true) ? OfficeOpenXml.Table.TableStyles.Light16 : OfficeOpenXml.Table.TableStyles.None);
+                sheet.Cells["A5"].Style.Font.Bold = true;
+                sheet.Cells["A" + 6 + ":M" + (Query.Count() - 1) + ""].AutoFitColumns();
+                MemoryStream stream = new MemoryStream();
+                package.SaveAs(stream);
+                return stream;
+            }
+
+
+        }
         #endregion
     }
 }
