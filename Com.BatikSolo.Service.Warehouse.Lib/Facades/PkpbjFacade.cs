@@ -22,6 +22,8 @@ using Com.BatikSolo.Service.Warehouse.Lib.Models.TransferModel;
 using Com.BatikSolo.Service.Warehouse.Lib.Interfaces.PkbjInterfaces;
 using Com.BatikSolo.Service.Warehouse.Lib.Serializers;
 using Microsoft.Extensions.Primitives;
+using System.Text.RegularExpressions;
+using Com.BatikSolo.Service.Warehouse.Lib.ViewModels.InventoryViewModel;
 
 namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 {
@@ -362,6 +364,28 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             }
         }
 
+        private List<SizeViewModel> GetSize(string code)
+        {
+            string itemUri = "master/sizes/sizename";
+            string queryUri = "?code=" + code;
+            string uri = itemUri + queryUri;
+
+            IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+
+            var response = httpClient.GetAsync($"{APIEndpoint.Core}{uri}").Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var content = response.Content.ReadAsStringAsync().Result;
+                Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                List<SizeViewModel> viewModel = JsonConvert.DeserializeObject<List<SizeViewModel>>(result.GetValueOrDefault("data").ToString());
+                return viewModel;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public Tuple<bool, List<object>> UploadValidate(ref List<SPKDocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body)
         {
             List<object> ErrorList = new List<object>();
@@ -373,11 +397,11 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
             foreach (SPKDocsCsvViewModel productVM in Data)
             {
                 ErrorMessage = "";
-				if (!(productVM.PackingList.Contains("BTS")))
-				{
-					ErrorMessage = string.Concat(ErrorMessage, "Format Packing List harus 'xxxx/BTS-FN/xx/xx, ");
-				}
-				if (string.IsNullOrWhiteSpace(productVM.PackingList))
+                if (!(productVM.PackingList.Contains("BTS")))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Format Packing List harus 'xxxx/BTS-FN/xx/xx, ");
+                }
+                if (string.IsNullOrWhiteSpace(productVM.PackingList))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "PackingList tidak boleh kosong, ");
                 }
@@ -400,20 +424,21 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh kosong, ");
                 }
-                //else if (Data.Any(d => d != productVM && d.name.Equals(productVM.name)))
-                //{
-                //    ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh duplikat, ");
-                //}
+
 
                 if (string.IsNullOrWhiteSpace(productVM.size))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Size tidak boleh kosong, ");
                 }
+                else
+                {
+                    var size = GetSize(Regex.Replace(productVM.size, @"\s", ""));
+                    if (size == null || size.Count == 0)
+                    {
+                        ErrorMessage = string.Concat(ErrorMessage, $"Size {productVM.size} belum ada di master size, ");
+                    }
+                }
 
-                //if (string.IsNullOrWhiteSpace(productVM.Currency.Code))
-                //{
-                //    ErrorMessage = string.Concat(ErrorMessage, "Mata Uang tidak boleh kosong, ");
-                //}
                 decimal domesticSale = 0;
                 if (string.IsNullOrWhiteSpace(productVM.domesticSale))
                 {
@@ -531,7 +556,6 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Valid, ErrorList);
         }
-
         public async Task UploadData(SPKDocs data, string username)
         {
             foreach (var i in data.Items)
