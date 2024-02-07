@@ -27,5 +27,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.ViewModels.InventoryViewModel
         public double Gross { get; set; }
         public double TotalOriCost { get; set; }
         public double TotalGross { get; set; }
+        public string Style { get; set; }
+        public string Group { get; set; }
     }
 }
