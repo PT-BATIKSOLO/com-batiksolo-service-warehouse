@@ -76,7 +76,7 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.PDFTemplates
             cellInternNoteHeaderLeft.Phrase = new Phrase("No. Packing List" + "       : " + viewModel.packingList, normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
-            cellInternNoteHeaderRight.Phrase = new Phrase("EQUITY TOWER 15C JL JEND SUDIRMAN KAV. 52-53\nSENAYAN KEBAYORAN BARU\nJAKARTA SELATAN DKI JAKARTA\nNO NPWP : 71.157.388.1-451.000", normal_font);
+            cellInternNoteHeaderRight.Phrase = new Phrase("Jln Merapi No. 23 RT. 000 RW. 000 Banaran,\nGrogol Kab. Sukoharjo Jawa Tengah\nTlp. (0271) 719911\nNO NPWP : 71.157.388.1-451.000", normal_font);
             cellInternNoteHeaderRight.Rowspan = 2;
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
