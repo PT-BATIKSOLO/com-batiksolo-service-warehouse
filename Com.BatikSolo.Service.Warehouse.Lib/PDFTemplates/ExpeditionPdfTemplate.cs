@@ -74,13 +74,13 @@ namespace Com.BatikSolo.Service.Warehouse.Lib.PDFTemplates
             PdfPCell cellInternNoteHeaderLeft = new PdfPCell() { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT };
             PdfPCell cellInternNoteHeaderRight = new PdfPCell() { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT };
 
-            cellInternNoteHeaderLeft.Phrase = new Phrase("PT. TABOR ANDALAN RETAILINDO", bold_font1);
+            cellInternNoteHeaderLeft.Phrase = new Phrase("PT. Bateeq Retailindo Utama", bold_font1);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
             cellInternNoteHeaderLeft.Phrase = new Phrase("No. Bon" + "       : " + viewModel.code, normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
-            cellInternNoteHeaderRight.Phrase = new Phrase("Jln Merapi No. 23 RT. 000 RW. 000 Banaran,\nGrogol Kab. Sukoharjo Jawa Tengah\nTlp. (0271) 719911\nNO NPWP : 71.157.388.1-451.000", normal_font);
+            cellInternNoteHeaderRight.Phrase = new Phrase("Jln Merapi No. 23 \nBanaran, Grogol, Sukoharjo\nJawa Tengah, 57552\nNO NPWP : 41.229.882.0-532.000", normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
             //cellInternNoteHeaderLeft.Phrase = new Phrase("Password" + "                 : " + viewModel.password, normal_font);
